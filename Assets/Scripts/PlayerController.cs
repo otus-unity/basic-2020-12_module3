@@ -11,6 +11,9 @@ public class PlayerController : MonoBehaviour
     private SpriteRenderer _spriteRenderer;
 
     public LayerMask ground;
+    public GameObject bloodStream;
+
+    SliderPlatform stayingOnPlatform;
     
     // Start is called before the first frame update
     void Start()
@@ -25,27 +28,31 @@ public class PlayerController : MonoBehaviour
     {
         float hDirection = Input.GetAxis("Horizontal");
 
+        float platformVelocity = 0.0f;
+        if (stayingOnPlatform != null)
+            platformVelocity = stayingOnPlatform.myrigidbody2d.velocity.x;
+
         if (hDirection < 0.0f)
         {
-            _rigidbody2D.velocity = new Vector2(-5, _rigidbody2D.velocity.y);
+            _rigidbody2D.velocity = new Vector2(-5 + platformVelocity, _rigidbody2D.velocity.y);
             _spriteRenderer.flipX = true;
             _animator.SetBool("running", true);
         } 
         else if (hDirection > 0.0f)
         {
-            _rigidbody2D.velocity = new Vector2(5, _rigidbody2D.velocity.y);
+            _rigidbody2D.velocity = new Vector2(5 + platformVelocity, _rigidbody2D.velocity.y);
             _spriteRenderer.flipX = false;
             _animator.SetBool("running", true);
         }
         else
         {
-            _rigidbody2D.velocity = new Vector2(0, _rigidbody2D.velocity.y);
+            _rigidbody2D.velocity = new Vector2(platformVelocity, _rigidbody2D.velocity.y);
             _animator.SetBool("running", false);
         }
 
         if (Input.GetKeyDown(KeyCode.Space) && _collider2D.IsTouchingLayers(ground))
         {
-            _rigidbody2D.velocity = new Vector2(_rigidbody2D.velocity.x, 5);
+            _rigidbody2D.velocity = new Vector2(_rigidbody2D.velocity.x, 7);
         }
     }
 
@@ -68,4 +75,18 @@ public class PlayerController : MonoBehaviour
             Destroy(other.gameObject);
         }
     }
+
+    /*
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.transform.TryGetComponent<SliderPlatform>(out var platform))
+            stayingOnPlatform = platform;
+    }
+
+    void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.transform.TryGetComponent<SliderPlatform>(out var platform))
+            stayingOnPlatform = null;
+    }
+    */
 }
