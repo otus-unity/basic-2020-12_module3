@@ -13,6 +13,10 @@ public class PlayerController : MonoBehaviour
     public LayerMask ground;
     public GameObject bloodStream;
 
+    public bool usePhysicsForMovement;
+    public float moveForce;
+    public float jumpForce;
+
     SliderPlatform stayingOnPlatform;
     
     // Start is called before the first frame update
@@ -34,25 +38,35 @@ public class PlayerController : MonoBehaviour
 
         if (hDirection < 0.0f)
         {
-            _rigidbody2D.velocity = new Vector2(-5 + platformVelocity, _rigidbody2D.velocity.y);
+            if (usePhysicsForMovement)
+                _rigidbody2D.AddForce(new Vector2(-moveForce, 0.0f), ForceMode2D.Impulse);
+            else
+                _rigidbody2D.velocity = new Vector2(-5 + platformVelocity, _rigidbody2D.velocity.y);
             _spriteRenderer.flipX = true;
             _animator.SetBool("running", true);
         } 
         else if (hDirection > 0.0f)
         {
-            _rigidbody2D.velocity = new Vector2(5 + platformVelocity, _rigidbody2D.velocity.y);
+            if (usePhysicsForMovement)
+                _rigidbody2D.AddForce(new Vector2(moveForce, 0.0f), ForceMode2D.Impulse);
+            else
+                _rigidbody2D.velocity = new Vector2(5 + platformVelocity, _rigidbody2D.velocity.y);
             _spriteRenderer.flipX = false;
             _animator.SetBool("running", true);
         }
         else
         {
-            _rigidbody2D.velocity = new Vector2(platformVelocity, _rigidbody2D.velocity.y);
+            if (!usePhysicsForMovement)
+                _rigidbody2D.velocity = new Vector2(platformVelocity, _rigidbody2D.velocity.y);
             _animator.SetBool("running", false);
         }
 
         if (Input.GetKeyDown(KeyCode.Space) && _collider2D.IsTouchingLayers(ground))
         {
-            _rigidbody2D.velocity = new Vector2(_rigidbody2D.velocity.x, 7);
+            if (usePhysicsForMovement)
+                _rigidbody2D.AddForce(new Vector2(0.0f, jumpForce), ForceMode2D.Impulse);
+            else
+                _rigidbody2D.velocity = new Vector2(_rigidbody2D.velocity.x, 7);
         }
     }
 
@@ -76,7 +90,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    /*
     void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.transform.TryGetComponent<SliderPlatform>(out var platform))
@@ -88,5 +101,4 @@ public class PlayerController : MonoBehaviour
         if (collision.transform.TryGetComponent<SliderPlatform>(out var platform))
             stayingOnPlatform = null;
     }
-    */
 }
